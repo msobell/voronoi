@@ -1,0 +1,30 @@
+#! /usr/bin/env python
+"""
+Solves the voronoi problem
+"""
+
+import sys
+import os
+import time
+
+start_time = time.time()
+
+def usage():
+    sys.stdout.write( __doc__ % os.path.basename(sys.argv[0]))
+
+if __name__ == "__main__":
+
+    if len(sys.argv) != 1:
+        usage()
+        sys.exit(1)
+
+    for line in sys.stdin:
+        
+    s = MySocket()
+    s.connect("localhost", 44444)
+    s.mysend(tag)
+    while 1:
+        data = s.myrecv()
+    s.close()
+
+    print "Time: ",round(time.time() - start_time)
