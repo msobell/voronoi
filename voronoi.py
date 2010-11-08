@@ -88,7 +88,6 @@ class GameState:
         return self.p0score, self.p1score
 
 def generate_move(board):
-    st = time.time()
     max_score = 0
     orig_moves = board.moves + []
     print "Orig moves",orig_moves
@@ -114,7 +113,8 @@ def generate_move(board):
 
     for t in tries:
         print "Try:",t
-        if (time.time() - st < (120 / (num_turns - board.moves_done))):
+        # Don't take up more than your fair share of time
+        if (time.time() - start_time) < (120 / (num_turns - board.moves_done)):
             x = t[0]
             y = t[1]
             new_moves = orig_moves + [[x,y]]
