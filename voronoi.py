@@ -30,13 +30,13 @@ def usage():
     sys.stdout.write( __doc__ % os.path.basename(sys.argv[0]))
 
 class GameState:
-    def __init__(self, moves = []):
+    def __init__(self, moves = [[]]):
         self.moves = moves
-        self.scores = [-1]*num_turns*2
         self.score = 0
         self.state = []
         self.p0score = -1
         self.p1score = -1
+        self.moves_done = 0
         for i in range(board_size):
             self.state.append([])
             for j in range(board_size):
@@ -45,45 +45,36 @@ class GameState:
     def make_move(self,x,y):
         x = int(x)
         y = int(y)
-        if len(self.moves) > 0:
-            self.moves.append([x,y])
-        else:
+        if self.moves_done == 0:
             self.moves = [[x,y]]
+        else:
+            self.moves.append([x,y])
+        self.moves_done += 1
 
     def score_board(self):
         nx = []
         ny = []
-        if len(self.moves) > 2:
+        print self.moves
+        if self.moves_done > 1:
             for move in self.moves:
                 nx.append(move[0])
                 ny.append(move[1])
-        elif len(self.moves) == 2:
-            nx = self.moves[0]
-            ny = self.moves[1]
 
-        if len(self.moves) <= 2:
-            self.p0score = board_size ** 2
-            self.p1score = 0
-
-        else:
+            print nx
+            print ny
             for y in range(board_size):
                 for x in range(board_size):
                     # find the closest move
                     dmin = math.hypot(board_size - 1, board_size - 1)
                     j = -1
-                    for i in range(num_turns*2):
-                        try:
-                            d = math.hypot(nx[i] - x, ny[i] - y)
-                            if d < dmin:
-                                dmin = d
-                                j = i
-                                p = i % 2
-                        except:
-                            # out of range
-                            pass
+                    for i in range(self.moves_done):
+                        d = math.hypot(nx[i] - x, ny[i] - y)
+                        if d < dmin:
+                            dmin = d
+                            j = i
+                            p = i % 2
                     if j > -1:
                         self.state[x][y] = p
-                        self.scores[j] += 1
 
             self.p0score = 0
             self.p1score = 0
@@ -94,38 +85,55 @@ class GameState:
                         self.p0score += 1
                     else:
                         self.p1score += 1
+        else:
+            self.p0score = board_size ** 2
+            self.p1score = 0
 
         return self.p0score, self.p1score
 
 def generate_move(board):
-    # Generate a random move		
     st = time.time()
     max_score = 0
     orig_moves = board.moves + []
     print "Orig moves",orig_moves
-    best_move = [0,0]
-    while(time.time() - st < (120 / num_moves - 1)):
-        x = random.randint (0, board_size)
-        y = random.randint (0, board_size)
+    mcount = 0
+    tries = []
+    for move in board.moves:
+        if mcount % 2 == 1:
+            tries.append([move[0]+1,move[1]+1])
+            tries.append([move[0]-1,move[1]-1])
+        mcount += 1
+        
+    if len(tries) == 0:
+        tries = [[200,200]]
+    
+    best_move = None
 
-        # If it's been done, generate until
-        # we get a fresh one.
-        while [x,y] in board.moves:
-                x = random.randint (0, board_size)
-                y = random.randint (0, board_size)
+    # prevent duplicate moves
+    for t in tries:
+        if t in board.moves:
+            tries.remove(t)
 
-        new_moves = orig_moves + [[x,y]]
-        if len(new_moves) == 1:
-            print "First move!"
-            return 200,200 # hard code the first move!
-        print "New moves",new_moves
-        g = GameState(moves=new_moves)
-        g.score_board()
-        print x, y
-        print g.p0score
-        if g.p0score > max_score:
-            best_move = [[x,y]]
+    print "Tries",tries
 
+    for t in tries:
+        print "Try:",t
+        if (time.time() - st < (120 / (num_turns - board.moves_done))):
+            x = t[0]
+            y = t[1]
+            new_moves = orig_moves + [[x,y]]
+            if board.moves_done == 0:
+                print "First move!"
+                return 200,200 # hard code the first move!
+            print "New moves",new_moves
+            g = GameState(moves=new_moves)
+            g.score_board()
+            print x, y
+            print g.p0score
+            if g.p0score > max_score:
+                max_score = g.p0score
+                best_move = [[x,y]]
+            
     return best_move[0][0], best_move[0][1]
 
 ## From:
@@ -225,3 +233,5 @@ if __name__ == "__main__":
             print "OPPONENT MOVE:", move
     # Poof!
     s.close ()
+
+    print time.time() - start_time
