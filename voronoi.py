@@ -26,13 +26,13 @@ def usage():
     sys.stdout.write( __doc__ % os.path.basename(sys.argv[0]))
 
 class GameState:
-    def __init__(self, moves = [[]]):
+    def __init__(self, moves = [[]], moves_done = 0):
         self.moves = moves
         self.score = 0
         self.state = []
         self.p0score = -1
         self.p1score = -1
-        self.moves_done = 0
+        self.moves_done = moves_done
         for i in range(board_size):
             self.state.append([])
             for j in range(board_size):
@@ -50,14 +50,14 @@ class GameState:
     def score_board(self):
         nx = []
         ny = []
-        print self.moves
-        if self.moves_done > 1:
+        print "Self.moves",self.moves
+        if self.moves_done > 0:
             for move in self.moves:
                 nx.append(move[0])
                 ny.append(move[1])
 
-            print nx
-            print ny
+            print "nx:",nx
+            print "ny:",ny
             for y in range(board_size):
                 for x in range(board_size):
                     # find the closest move
@@ -82,6 +82,7 @@ class GameState:
                     else:
                         self.p1score += 1
         else:
+            print "Num moves:",self.moves_done
             self.p0score = board_size ** 2
             self.p1score = 0
 
@@ -104,17 +105,14 @@ def generate_move(board):
     
     best_move = None
 
-    # prevent duplicate moves
-    for t in tries:
-        if t in board.moves:
-            tries.remove(t)
-
-    print "Tries",tries
+    print "Tries:",tries
+    print "Moves:",board.moves
 
     for t in tries:
         print "Try:",t
         # Don't take up more than your fair share of time
-        if (time.time() - start_time) < (120 / (num_turns - board.moves_done)):
+        # if (time.time() - start_time) < (120 / (num_turns - board.moves_done)) and t not in board.moves:
+        if t not in board.moves:
             x = t[0]
             y = t[1]
             new_moves = orig_moves + [[x,y]]
@@ -122,7 +120,7 @@ def generate_move(board):
                 print "First move!"
                 return 200,200 # hard code the first move!
             print "New moves",new_moves
-            g = GameState(moves=new_moves)
+            g = GameState(moves=new_moves,moves_done=board.moves_done)
             g.score_board()
             print x,y
             print g.p0score
