@@ -124,7 +124,7 @@ def generate_move(board):
             print "New moves",new_moves
             g = GameState(moves=new_moves)
             g.score_board()
-            print x, y
+            print x,y
             print g.p0score
             if g.p0score > max_score:
                 max_score = g.p0score
