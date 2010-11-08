@@ -10,10 +10,6 @@ import math
 import sys
 import os
 import time
-from PIL import Image
-imgx = 400
-imgy = 400
-image = Image.new("RGB", (imgx, imgy))
 
 HOST = '127.0.0.1'
 PORT = 20000
