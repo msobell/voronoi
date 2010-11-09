@@ -95,7 +95,11 @@ def generate_move(board):
     mcount = 0
     tries = []
     for move in board.moves:
-        if mcount % 2 == 1:
+        if my_num == 1:
+            mn = 1
+        else:
+            mn = 0
+        if mcount % 2 == mn:
             tries.append([move[0]+1,move[1]+1])
             tries.append([move[0]-1,move[1]-1])
         mcount += 1
@@ -123,9 +127,15 @@ def generate_move(board):
             g = GameState(moves=new_moves,moves_done=board.moves_done)
             g.score_board()
             print x,y
-            print g.p0score
-            if g.p0score > max_score:
-                max_score = g.p0score
+            tscore = 0
+            if my_num == 1:
+                tscore = g.p0score
+                print g.p0score
+            else:
+                tscore = g.p1score
+                print g.p1score
+            if tscore > max_score:
+                max_score = tscore
                 best_move = [[x,y]]
             
     return best_move[0][0], best_move[0][1]
@@ -198,7 +208,11 @@ if __name__ == "__main__":
             print line
 
             # Generate a move here
-            x,y = generate_move(board)
+            try:
+                x,y = generate_move(board)
+            except:
+                x = 74
+                y = 89
 
             # Save move for duplicate checking
             board.make_move(x,y)
